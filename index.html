@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Chunker Tool</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Main container for layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #0d6efd;
+            text-align: center;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
+            margin-top: 0;
+        }
+
+        p.instructions {
+            color: #6c757d;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        /* Input section */
+        #codeInput {
+            width: 100%;
+            height: 300px;
+            padding: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        #lineCount {
+            font-size: 0.9em;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        /* Controls for splitting the code */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #f8f9fa;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 6px;
+            gap: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-group input[type="number"] {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+
+        #splitBtn {
+            background-color: #0d6efd;
+            color: white;
+        }
+        #splitBtn:hover {
+            background-color: #0b5ed7;
+        }
+
+        #clearBtn {
+            background-color: #6c757d;
+            color: white;
+        }
+        #clearBtn:hover {
+            background-color: #5c636a;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* Output section for code chunks */
+        #outputContainer {
+            margin-top: 30px;
+        }
+
+        .chunk {
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            overflow: hidden; /* Ensures border-radius is respected by children */
+        }
+
+        .chunk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e9ecef;
+            padding: 10px 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .chunk-header h3 {
+            margin: 0;
+            font-size: 1.1em;
+            color: #343a40;
+        }
+
+        .copy-btn {
+            background-color: #28a745;
+            color: white;
+            font-size: 14px;
+            padding: 5px 12px;
+        }
+        .copy-btn:hover {
+            background-color: #218838;
+        }
+        .copy-btn.copied {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .chunk-content {
+            padding: 15px;
+            max-height: 400px;
+            overflow: auto;
+            background-color: #282c34; /* Dark background for code */
+            color: #abb2bf; /* Light grey text */
+        }
+
+        pre, code {
+            margin: 0;
+            padding: 0;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+            white-space: pre-wrap; /* Wraps long lines */
+            word-break: break-all; /* Breaks very long words/tokens */
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Code Chunker Tool</h1>
+        <p class="instructions">Paste your large code file below. Choose how you want to split it, and get copy-paste-ready chunks for your AI assistant.</p>
+        
+        <div class="input-section">
+            <textarea id="codeInput" placeholder="Paste your code here..."></textarea>
+            <div id="lineCount">Total Lines: 0</div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <input type="radio" id="splitByLines" name="splitMode" value="lines" checked>
+                <label for="splitByLines">Split by Lines/Chunk:</label>
+                <input type="number" id="chunkSize" value="2000" min="1">
+            </div>
+            
+            <div class="control-group">
+                <input type="radio" id="splitByParts" name="splitMode" value="parts">
+                <label for="splitByParts">Split into Total Parts:</label>
+                <input type="number" id="numChunks" value="3" min="1">
+            </div>
+            
+            <div class="actions">
+                <button id="splitBtn">Split Code</button>
+                <button id="clearBtn">Clear All</button>
+            </div>
+        </div>
+
+        <div id="outputContainer">
+            <!-- Code chunks will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all necessary DOM elements
+            const codeInput = document.getElementById('codeInput');
+            const lineCountEl = document.getElementById('lineCount');
+            const splitBtn = document.getElementById('splitBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const outputContainer = document.getElementById('outputContainer');
+            
+            const splitByLinesRadio = document.getElementById('splitByLines');
+            const chunkSizeInput = document.getElementById('chunkSize');
+            const splitByPartsRadio = document.getElementById('splitByParts');
+            const numChunksInput = document.getElementById('numChunks');
+
+            // Update line count on input
+            codeInput.addEventListener('input', () => {
+                const lines = codeInput.value.split('\n').length;
+                lineCountEl.textContent = `Total Lines: ${lines}`;
+            });
+
+            // Main function to split the code
+            function splitCode() {
+                const fullCode = codeInput.value;
+                if (!fullCode.trim()) {
+                    alert('Please paste some code first!');
+                    return;
+                }
+                
+                const lines = fullCode.split('\n');
+                const totalLines = lines.length;
+                let chunks = [];
+
+                if (splitByLinesRadio.checked) {
+                    // --- Split by a fixed number of lines per chunk ---
+                    const chunkSize = parseInt(chunkSizeInput.value, 10);
+                    if (isNaN(chunkSize) || chunkSize < 1) {
+                        alert('Please enter a valid number of lines per chunk.');
+                        return;
+                    }
+
+                    for (let i = 0; i < totalLines; i += chunkSize) {
+                        const chunkLines = lines.slice(i, i + chunkSize);
+                        chunks.push(chunkLines.join('\n'));
+                    }
+                } else {
+                    // --- Split into a fixed number of total parts ---
+                    const numChunks = parseInt(numChunksInput.value, 10);
+                    if (isNaN(numChunks) || numChunks < 1) {
+                        alert('Please enter a valid number of total parts.');
+                        return;
+                    }
+
+                    const baseChunkSize = Math.floor(totalLines / numChunks);
+                    const remainder = totalLines % numChunks;
+                    let currentLine = 0;
+
+                    for (let i = 0; i < numChunks; i++) {
+                        // Distribute the remainder lines one by one to the first few chunks
+                        const chunkSize = baseChunkSize + (i < remainder ? 1 : 0);
+                        if (chunkSize === 0) continue; // Avoid creating empty chunks
+                        
+                        const chunkLines = lines.slice(currentLine, currentLine + chunkSize);
+                        chunks.push(chunkLines.join('\n'));
+                        currentLine += chunkSize;
+                    }
+                }
+
+                displayChunks(chunks);
+            }
+            
+            // Function to display the generated chunks on the page
+            function displayChunks(chunks) {
+                outputContainer.innerHTML = ''; // Clear previous output
+                
+                if (chunks.length === 0) {
+                    outputContainer.innerHTML = '<p>No chunks were generated. Try adjusting your settings.</p>';
+                    return;
+                }
+
+                chunks.forEach((chunkContent, index) => {
+                    const partNumber = index + 1;
+                    const totalParts = chunks.length;
+                    
+                    // Create the chunk element
+                    const chunkDiv = document.createElement('div');
+                    chunkDiv.className = 'chunk';
+                    
+                    // Use a template literal for clean HTML structure
+                    chunkDiv.innerHTML = `
+                        <div class="chunk-header">
+                            <h3>Part ${partNumber} of ${totalParts}</h3>
+                            <button class="copy-btn" data-part="${partNumber}">Copy</button>
+                        </div>
+                        <div class="chunk-content">
+                            <pre><code></code></pre>
+                        </div>
+                    `;
+                    
+                    // Set the code content safely to prevent XSS
+                    chunkDiv.querySelector('code').textContent = chunkContent;
+                    
+                    outputContainer.appendChild(chunkDiv);
+                });
+            }
+
+            // Function to clear everything
+            function clearAll() {
+                codeInput.value = '';
+                outputContainer.innerHTML = '';
+                lineCountEl.textContent = 'Total Lines: 0';
+                codeInput.focus();
+            }
+
+            // Event listener for the main split button
+            splitBtn.addEventListener('click', splitCode);
+            
+            // Event listener for the clear button
+            clearBtn.addEventListener('click', clearAll);
+
+            // Event delegation for copy buttons
+            outputContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('copy-btn')) {
+                    const button = e.target;
+                    const chunkDiv = button.closest('.chunk');
+                    const codeToCopy = chunkDiv.querySelector('code').textContent;
+
+                    // Use the modern Clipboard API
+                    navigator.clipboard.writeText(codeToCopy).then(() => {
+                        // Provide visual feedback
+                        button.textContent = 'Copied!';
+                        button.classList.add('copied');
+                        
+                        // Reset button text after 2 seconds
+                        setTimeout(() => {
+                            button.textContent = 'Copy';
+                            button.classList.remove('copied');
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Failed to copy text: ', err);
+                        alert('Could not copy text. Please check your browser permissions.');
+                    });
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
