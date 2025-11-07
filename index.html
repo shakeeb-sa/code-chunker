@@ -3,362 +3,793 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Chunker Tool</title>
+    <title>Code Chunker Pro – Split Big Code Like a Boss</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* General Styling */
+        :root {
+            --primary: #0d6efd;
+            --primary-dark: #0b5ed7;
+            --success: #28a745;
+            --success-dark: #218838;
+            --warning: #ffc107;
+            --gray: #6c757d;
+            --gray-dark: #5c636a;
+            --light: #f8f9fa;
+            --dark-bg: #282c34;
+            --dark-text: #abb2bf;
+            --border: #dee2e6;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+            --radius: 8px;
+            --transition: all 0.25s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f0f2f5;
+            background: linear-gradient(135deg, #f0f2f5 0%, #e9ecef 100%);
             color: #1c1e21;
             line-height: 1.6;
-            margin: 0;
+            min-height: 100vh;
             padding: 20px;
         }
 
-        /* Main container for layout */
         .container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
-            background-color: #ffffff;
+            background: #ffffff;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), #0056b3);
+            color: white;
             padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
 
         h1 {
-            color: #0d6efd;
-            text-align: center;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 15px;
-            margin-top: 0;
+            font-size: 2.2rem;
+            margin: 0;
+            font-weight: 700;
         }
 
-        p.instructions {
-            color: #6c757d;
-            text-align: center;
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-top: 8px;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .input-section {
             margin-bottom: 25px;
         }
-        
-        /* Input section */
+
+        .input-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .input-header h2 {
+            font-size: 1.3rem;
+            color: #343a40;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-upload {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-upload input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-upload-label {
+            background: var(--light);
+            border: 2px dashed #ced4da;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-upload-label:hover {
+            border-color: var(--primary);
+            background: #e7f0ff;
+        }
+
         #codeInput {
             width: 100%;
-            height: 300px;
-            padding: 15px;
+            height: 320px;
+            padding: 16px;
             border: 1px solid #ced4da;
             border-radius: 6px;
-            font-family: "Courier New", Courier, monospace;
-            font-size: 14px;
+            font-family: "Fira Code", "Courier New", monospace;
+            font-size: 14.5px;
             resize: vertical;
-            box-sizing: border-box;
-        }
-        #lineCount {
-            font-size: 0.9em;
-            color: #6c757d;
-            text-align: right;
-            margin-top: 5px;
+            transition: var(--transition);
+            background: #fdfdfe;
         }
 
-        /* Controls for splitting the code */
-        .controls {
+        #codeInput:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+        }
+
+        .stats-bar {
             display: flex;
-            flex-wrap: wrap;
-            align-items: center;
             justify-content: space-between;
-            background-color: #f8f9fa;
-            padding: 20px;
-            margin-top: 20px;
-            border-radius: 6px;
-            gap: 20px;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--gray);
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
-        .control-group {
+        .stats-bar .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .controls {
+            background: var(--light);
+            padding: 22px;
+            border-radius: 6px;
+            margin: 25px 0;
+            border: 1px solid #e9ecef;
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .mode-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .mode-card {
+            background: white;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .mode-card.selected {
+            border-color: var(--primary);
+            background: #f0f7ff;
+            box-shadow: 0 0 0 1px rgba(13,110,253,0.1);
+        }
+
+        .mode-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .mode-card h3 {
+            margin: 0 0 6px 0;
+            font-size: 1.1rem;
+            color: #212529;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mode-card p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .input-wrapper {
             display: flex;
             align-items: center;
             gap: 10px;
+            margin-top: 10px;
         }
-        
-        .control-group input[type="number"] {
-            width: 80px;
-            padding: 8px;
+
+        .input-wrapper input[type="number"] {
+            width: 90px;
+            padding: 9px;
             border: 1px solid #ced4da;
-            border-radius: 4px;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .input-wrapper input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary);
         }
 
         .actions {
             display: flex;
-            gap: 10px;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         button {
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.1s ease;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         #splitBtn {
-            background-color: #0d6efd;
+            background: var(--primary);
             color: white;
         }
+
         #splitBtn:hover {
-            background-color: #0b5ed7;
+            background: var(--primary-dark);
+            transform: translateY(-1px);
         }
 
         #clearBtn {
-            background-color: #6c757d;
+            background: var(--gray);
             color: white;
         }
+
         #clearBtn:hover {
-            background-color: #5c636a;
+            background: var(--gray-dark);
+        }
+
+        #downloadAllBtn {
+            background: var(--success);
+            color: white;
+        }
+
+        #downloadAllBtn:hover {
+            background: var(--success-dark);
         }
 
         button:active {
             transform: scale(0.98);
         }
 
-        /* Output section for code chunks */
+        .output-section h2 {
+            font-size: 1.3rem;
+            color: #343a40;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         #outputContainer {
-            margin-top: 30px;
+            display: grid;
+            gap: 20px;
+        }
+
+        @media (min-width: 992px) {
+            #outputContainer {
+                grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+            }
         }
 
         .chunk {
-            background-color: #ffffff;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            overflow: hidden; /* Ensures border-radius is respected by children */
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            transition: var(--transition);
+        }
+
+        .chunk:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .chunk-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: #e9ecef;
-            padding: 10px 15px;
-            border-bottom: 1px solid #dee2e6;
+            background: #e9ecef;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
         }
 
         .chunk-header h3 {
             margin: 0;
-            font-size: 1.1em;
+            font-size: 1.1rem;
             color: #343a40;
+            font-weight: 600;
+        }
+
+        .chunk-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .copy-btn, .download-btn {
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .copy-btn {
-            background-color: #28a745;
+            background: var(--success);
             color: white;
-            font-size: 14px;
-            padding: 5px 12px;
         }
+
         .copy-btn:hover {
-            background-color: #218838;
+            background: var(--success-dark);
         }
+
         .copy-btn.copied {
-            background-color: #ffc107;
+            background: var(--warning);
             color: #212529;
         }
 
+        .download-btn {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .download-btn:hover {
+            background: #138496;
+        }
+
         .chunk-content {
-            padding: 15px;
-            max-height: 400px;
-            overflow: auto;
-            background-color: #282c34; /* Dark background for code */
-            color: #abb2bf; /* Light grey text */
-        }
-
-        pre, code {
-            margin: 0;
             padding: 0;
-            font-family: "Courier New", Courier, monospace;
-            font-size: 14px;
-            white-space: pre-wrap; /* Wraps long lines */
-            word-break: break-all; /* Breaks very long words/tokens */
+            max-height: 420px;
+            overflow: auto;
+            background: var(--dark-bg);
         }
 
+        pre {
+            margin: 0;
+            padding: 16px;
+        }
+
+        code {
+            font-family: "Fira Code", "Courier New", monospace;
+            font-size: 14px;
+            color: var(--dark-text);
+            white-space: pre;
+            word-wrap: break-word;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #6c757d;
+            font-size: 0.9rem;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+
+        .toast.error {
+            background: #dc3545;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .actions {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+            .input-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
     </style>
+    <link href="https://cdn.jsdelivr.net/npm/firacode@6.2.0/distr/fira_code.css" rel="stylesheet">
 </head>
 <body>
 
     <div class="container">
-        <h1>Code Chunker Tool</h1>
-        <p class="instructions">Paste your large code file below. Choose how you want to split it, and get copy-paste-ready chunks for your AI assistant.</p>
-        
-        <div class="input-section">
-            <textarea id="codeInput" placeholder="Paste your code here..."></textarea>
-            <div id="lineCount">Total Lines: 0</div>
-        </div>
-        
-        <div class="controls">
-            <div class="control-group">
-                <input type="radio" id="splitByLines" name="splitMode" value="lines" checked>
-                <label for="splitByLines">Split by Lines/Chunk:</label>
-                <input type="number" id="chunkSize" value="2000" min="1">
-            </div>
-            
-            <div class="control-group">
-                <input type="radio" id="splitByParts" name="splitMode" value="parts">
-                <label for="splitByParts">Split into Total Parts:</label>
-                <input type="number" id="numChunks" value="3" min="1">
-            </div>
-            
-            <div class="actions">
-                <button id="splitBtn">Split Code</button>
-                <button id="clearBtn">Clear All</button>
-            </div>
+        <header>
+            <h1><i class="fas fa-cut"></i> Code Chunker Pro</h1>
+            <p class="subtitle">Split massive code files into AI-friendly chunks – with style, speed, and zero drama.</p>
+        </header>
+
+        <div class="main-content">
+            <section class="input-section">
+                <div class="input-header">
+                    <h2><i class="fas fa-code"></i> Paste or Upload Your Code</h2>
+                    <div class="file-upload">
+                        <input type="file" id="fileInput" accept=".txt,.js,.py,.java,.cpp,.c,.html,.css,.json,.xml,.yaml,.yml,.md">
+                        <label for="fileInput" class="file-upload-label">
+                            <i class="fas fa-upload"></i> Upload File
+                        </label>
+                    </div>
+                </div>
+                <textarea id="codeInput" placeholder="Paste your massive codebase here... or drop a file!"></textarea>
+                <div class="stats-bar">
+                    <div class="stat"><i class="fas fa-align-left"></i> <span id="lineCount">Lines: 0</span></div>
+                    <div class="stat"><i class="fas fa-text-height"></i> <span id="charCount">Chars: 0</span></div>
+                    <div class="stat"><i class="fas fa-file-code"></i> <span id="wordCount">Words: 0</span></div>
+                    <div class="stat"><i class="fas fa-microchip"></i> <span id="tokenEstimate">~0 tokens</span></div>
+                </div>
+            </section>
+
+            <section class="controls">
+                <div class="mode-selector">
+                    <label class="mode-card selected">
+                        <input type="radio" name="splitMode" value="lines" checked>
+                        <h3><i class="fas fa-ruler-vertical"></i> Fixed Lines per Chunk</h3>
+                        <p>Split code into chunks of exact line count</p>
+                        <div class="input-wrapper">
+                            <input type="number" id="chunkSize" value="1500" min="1" max="10000">
+                            <span>lines</span>
+                        </div>
+                    </label>
+
+                    <label class="mode-card">
+                        <input type="radio" name="splitMode" value="parts">
+                        <h3><i class="fas fa-th-large"></i> Equal Total Parts</h3>
+                        <p>Divide into N roughly equal chunks</p>
+                        <div class="input-wrapper">
+                            <input type="number" id="numChunks" value="5" min="1" max="50">
+                            <span>parts</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="actions">
+                    <button id="splitBtn"><i class="fas fa-cut"></i> Split Code</button>
+                    <button id="clearBtn"><i class="fas fa-trash"></i> Clear All</button>
+                    <button id="downloadAllBtn" style="display:none;"><i class="fas fa-download"></i> Download All</button>
+                </div>
+            </section>
+
+            <section class="output-section">
+                <h2><i class="fas fa-puzzle-piece"></i> Code Chunks</h2>
+                <div id="outputContainer">
+                    <div class="empty-state">
+                        <i class="fas fa-code"></i>
+                        <h3>No chunks yet!</h3>
+                        <p>Paste your code and hit "Split Code" to get started.</p>
+                    </div>
+                </div>
+            </section>
         </div>
 
-        <div id="outputContainer">
-            <!-- Code chunks will be dynamically inserted here -->
-        </div>
+        <footer>
+            <p>Code Chunker Pro &copy; 2025 – Built with <i class="fas fa-heart" style="color:#e25555;"></i> for developers who hate token limits.</p>
+        </footer>
+    </div>
+
+    <div id="toast" class="toast">
+        <span id="toastMessage"></span>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get all necessary DOM elements
-            const codeInput = document.getElementById('codeInput');
-            const lineCountEl = document.getElementById('lineCount');
-            const splitBtn = document.getElementById('splitBtn');
-            const clearBtn = document.getElementById('clearBtn');
-            const outputContainer = document.getElementById('outputContainer');
-            
-            const splitByLinesRadio = document.getElementById('splitByLines');
-            const chunkSizeInput = document.getElementById('chunkSize');
-            const splitByPartsRadio = document.getElementById('splitByParts');
-            const numChunksInput = document.getElementById('numChunks');
+        // DOM Elements
+        const codeInput = document.getElementById('codeInput');
+        const fileInput = document.getElementById('fileInput');
+        const lineCountEl = document.getElementById('lineCount');
+        const charCountEl = document.getElementById('charCount');
+        const wordCountEl = document.getElementById('wordCount');
+        const tokenEstimateEl = document.getElementById('tokenEstimate');
+        const splitBtn = document.getElementById('splitBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const downloadAllBtn = document.getElementById('downloadAllBtn');
+        const outputContainer = document.getElementById('outputContainer');
+        const modeCards = document.querySelectorAll('.mode-card');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
 
-            // Update line count on input
-            codeInput.addEventListener('input', () => {
-                const lines = codeInput.value.split('\n').length;
-                lineCountEl.textContent = `Total Lines: ${lines}`;
-            });
+        // Token estimation (rough: ~4 chars per token)
+        const estimateTokens = (text) => Math.ceil(text.length / 4);
 
-            // Main function to split the code
-            function splitCode() {
-                const fullCode = codeInput.value;
-                if (!fullCode.trim()) {
-                    alert('Please paste some code first!');
-                    return;
-                }
-                
-                const lines = fullCode.split('\n');
-                const totalLines = lines.length;
-                let chunks = [];
+        // Update stats
+        const updateStats = () => {
+            const text = codeInput.value;
+            const lines = text.split('\n').length;
+            const chars = text.length;
+            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+            const tokens = estimateTokens(text);
 
-                if (splitByLinesRadio.checked) {
-                    // --- Split by a fixed number of lines per chunk ---
-                    const chunkSize = parseInt(chunkSizeInput.value, 10);
-                    if (isNaN(chunkSize) || chunkSize < 1) {
-                        alert('Please enter a valid number of lines per chunk.');
-                        return;
-                    }
+            lineCountEl.textContent = `Lines: ${lines.toLocaleString()}`;
+            charCountEl.textContent = `Chars: ${chars.toLocaleString()}`;
+            wordCountEl.textContent = `Words: ${words.toLocaleString()}`;
+            tokenEstimateEl.textContent = `~${tokens.toLocaleString()} tokens`;
+        };
 
-                    for (let i = 0; i < totalLines; i += chunkSize) {
-                        const chunkLines = lines.slice(i, i + chunkSize);
-                        chunks.push(chunkLines.join('\n'));
-                    }
-                } else {
-                    // --- Split into a fixed number of total parts ---
-                    const numChunks = parseInt(numChunksInput.value, 10);
-                    if (isNaN(numChunks) || numChunks < 1) {
-                        alert('Please enter a valid number of total parts.');
-                        return;
-                    }
+        // File upload handler
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-                    const baseChunkSize = Math.floor(totalLines / numChunks);
-                    const remainder = totalLines % numChunks;
-                    let currentLine = 0;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                codeInput.value = ev.target.result;
+                updateStats();
+                showToast(`Loaded: ${file.name}`, 'success');
+            };
+            reader.onerror = () => showToast('Failed to read file', 'error');
+            reader.readAsText(file);
+        });
 
-                    for (let i = 0; i < numChunks; i++) {
-                        // Distribute the remainder lines one by one to the first few chunks
-                        const chunkSize = baseChunkSize + (i < remainder ? 1 : 0);
-                        if (chunkSize === 0) continue; // Avoid creating empty chunks
-                        
-                        const chunkLines = lines.slice(currentLine, currentLine + chunkSize);
-                        chunks.push(chunkLines.join('\n'));
-                        currentLine += chunkSize;
-                    }
-                }
-
-                displayChunks(chunks);
-            }
-            
-            // Function to display the generated chunks on the page
-            function displayChunks(chunks) {
-                outputContainer.innerHTML = ''; // Clear previous output
-                
-                if (chunks.length === 0) {
-                    outputContainer.innerHTML = '<p>No chunks were generated. Try adjusting your settings.</p>';
-                    return;
-                }
-
-                chunks.forEach((chunkContent, index) => {
-                    const partNumber = index + 1;
-                    const totalParts = chunks.length;
-                    
-                    // Create the chunk element
-                    const chunkDiv = document.createElement('div');
-                    chunkDiv.className = 'chunk';
-                    
-                    // Use a template literal for clean HTML structure
-                    chunkDiv.innerHTML = `
-                        <div class="chunk-header">
-                            <h3>Part ${partNumber} of ${totalParts}</h3>
-                            <button class="copy-btn" data-part="${partNumber}">Copy</button>
-                        </div>
-                        <div class="chunk-content">
-                            <pre><code></code></pre>
-                        </div>
-                    `;
-                    
-                    // Set the code content safely to prevent XSS
-                    chunkDiv.querySelector('code').textContent = chunkContent;
-                    
-                    outputContainer.appendChild(chunkDiv);
-                });
-            }
-
-            // Function to clear everything
-            function clearAll() {
-                codeInput.value = '';
-                outputContainer.innerHTML = '';
-                lineCountEl.textContent = 'Total Lines: 0';
-                codeInput.focus();
-            }
-
-            // Event listener for the main split button
-            splitBtn.addEventListener('click', splitCode);
-            
-            // Event listener for the clear button
-            clearBtn.addEventListener('click', clearAll);
-
-            // Event delegation for copy buttons
-            outputContainer.addEventListener('click', function(e) {
-                if (e.target.classList.contains('copy-btn')) {
-                    const button = e.target;
-                    const chunkDiv = button.closest('.chunk');
-                    const codeToCopy = chunkDiv.querySelector('code').textContent;
-
-                    // Use the modern Clipboard API
-                    navigator.clipboard.writeText(codeToCopy).then(() => {
-                        // Provide visual feedback
-                        button.textContent = 'Copied!';
-                        button.classList.add('copied');
-                        
-                        // Reset button text after 2 seconds
-                        setTimeout(() => {
-                            button.textContent = 'Copy';
-                            button.classList.remove('copied');
-                        }, 2000);
-                    }).catch(err => {
-                        console.error('Failed to copy text: ', err);
-                        alert('Could not copy text. Please check your browser permissions.');
-                    });
-                }
+        // Drag & drop support
+        ['dragover', 'dragenter'].forEach(evt => {
+            codeInput.addEventListener(evt, (e) => {
+                e.preventDefault();
+                codeInput.style.borderColor = 'var(--primary)';
             });
         });
-    </script>
 
+        ['dragleave', 'dragend'].forEach(evt => {
+            codeInput.addEventListener(evt, () => {
+                codeInput.style.borderColor = '#ced4da';
+            });
+        });
+
+        codeInput.addEventListener('drop', (e) => {
+            e.preventDefault();
+            codeInput.style.borderColor = '#ced4da';
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('text/') || file.name.match(/\.(txt|js|py|java|cpp|c|html|css|json|xml|ya?ml|md)$/i)) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    codeInput.value = ev.target.result;
+                    updateStats();
+                    showToast(`Dropped: ${file.name}`, 'success');
+                };
+                reader.readAsText(file);
+            } else {
+                showToast('Unsupported file type', 'error');
+            }
+        });
+
+        // Mode selection UI
+        modeCards.forEach(card => {
+            card.addEventListener('click', () => {
+                modeCards.forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                card.querySelector('input').checked = true;
+            });
+        });
+
+        // Split logic
+        const splitCode = () => {
+            const fullCode = codeInput.value.trim();
+            if (!fullCode) {
+                showToast('No code to split! Paste or upload something.', 'error');
+                return;
+            }
+
+            const lines = fullCode.split('\n');
+            const totalLines = lines.length;
+            let chunks = [];
+
+            if (document.querySelector('input[value="lines"]').checked) {
+                const size = parseInt(document.getElementById('chunkSize').value) || 1500;
+                for (let i = 0; i < totalLines; i += size) {
+                    chunks.push(lines.slice(i, i + size).join('\n'));
+                }
+            } else {
+                const parts = parseInt(document.getElementById('numChunks').value) || 5;
+                const base = Math.floor(totalLines / parts);
+                const rem = totalLines % parts;
+                let pos = 0;
+                for (let i = 0; i < parts; i++) {
+                    const size = base + (i < rem ? 1 : 0);
+                    if (size > 0) {
+                        chunks.push(lines.slice(pos, pos + size).join('\n'));
+                        pos += size;
+                    }
+                }
+            }
+
+            displayChunks(chunks);
+            downloadAllBtn.style.display = chunks.length > 1 ? 'flex' : 'none';
+            showToast(`Split into ${chunks.length} chunk${chunks.length > 1 ? 's' : ''}!`, 'success');
+        };
+
+        // Display chunks
+        const displayChunks = (chunks) => {
+            outputContainer.innerHTML = '';
+            if (!chunks.length) {
+                outputContainer.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>No chunks generated. Try different settings.</p></div>`;
+                return;
+            }
+
+            chunks.forEach((content, i) => {
+                const chunkEl = document.createElement('div');
+                chunkEl.className = 'chunk';
+                chunkEl.innerHTML = `
+                    <div class="chunk-header">
+                        <h3>Part ${i + 1} of ${chunks.length}</h3>
+                        <div class="chunk-actions">
+                            <button class="copy-btn" data-index="${i}"><i class="fas fa-copy"></i> Copy</button>
+                            <button class="download-btn" data-index="${i}"><i class="fas fa-download"></i> Save</button>
+                        </div>
+                    </div>
+                    <div class="chunk-content">
+                        <pre><code>${escapeHtml(content)}</code></pre>
+                    </div>
+                `;
+                outputContainer.appendChild(chunkEl);
+            });
+        };
+
+        // HTML escape
+        const escapeHtml = (text) => text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+        // Copy handler
+        outputContainer.addEventListener('click', async (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+
+            if (btn.classList.contains('copy-btn')) {
+                const code = btn.closest('.chunk').querySelector('code').textContent;
+                try {
+                    await navigator.clipboard.writeText(code);
+                    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    btn.classList.add('copied');
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                        btn.classList.remove('copied');
+                    }, 2000);
+                } catch (err) {
+                    showToast('Copy failed', 'error');
+                }
+            }
+
+            if (btn.classList.contains('download-btn')) {
+                const code = btn.closest('.chunk').querySelector('code').textContent;
+                const index = btn.dataset.index;
+                downloadText(code, `chunk-part-${parseInt(index)+1}.txt`);
+            }
+        });
+
+        // Download all
+        downloadAllBtn.addEventListener('click', () => {
+            const chunks = Array.from(outputContainer.querySelectorAll('.chunk code'));
+            const zip = new JSZip();
+            chunks.forEach((codeEl, i) => {
+                zip.file(`part_${i+1}.txt`, codeEl.textContent);
+            });
+            zip.generateAsync({type: 'blob'}).then(blob => {
+                downloadBlob(blob, 'code-chunks.zip');
+            });
+        });
+
+        // Download helpers
+        const downloadText = (text, filename) => {
+            const blob = new Blob([text], {type: 'text/plain'});
+            downloadBlob(blob, filename);
+        };
+
+        const downloadBlob = (blob, filename) => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        // Toast notification
+        const showToast = (msg, type = 'success') => {
+            toastMessage.textContent = msg;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        };
+
+        // Clear all
+        const clearAll = () => {
+            codeInput.value = '';
+            outputContainer.innerHTML = `<div class="empty-state"><i class="fas fa-code"></i><h3>No chunks yet!</h3><p>Paste your code and hit "Split Code" to get started.</p></div>`;
+            downloadAllBtn.style.display = 'none';
+            updateStats();
+            codeInput.focus();
+        };
+
+        // Event listeners
+        codeInput.addEventListener('input', updateStats);
+        splitBtn.addEventListener('click', splitCode);
+        clearBtn.addEventListener('click', clearAll);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === 'Enter') splitCode();
+                if (e.key === 'd') clearAll();
+            }
+        });
+
+        // Initialize
+        updateStats();
+        codeInput.focus();
+
+        // Load JSZip for download all
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+        document.head.appendChild(script);
+    </script>
 </body>
 </html>
