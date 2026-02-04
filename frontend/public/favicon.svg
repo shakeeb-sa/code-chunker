@@ -1,0 +1,15 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background: Dark Slate -->
+  <rect width="64" height="64" rx="14" fill="#111827"/>
+
+  <!-- Top Code Chunk (Orange) -->
+  <rect x="15" y="14" width="34" height="13" rx="3" fill="#FF6C37"/>
+  <rect x="20" y="19" width="24" height="3" rx="1.5" fill="white" fill-opacity="0.3"/>
+
+  <!-- Bottom Code Chunk (Orange) -->
+  <rect x="15" y="37" width="34" height="13" rx="3" fill="#FF6C37"/>
+  <rect x="20" y="42" width="24" height="3" rx="1.5" fill="white" fill-opacity="0.3"/>
+
+  <!-- The Cut Line (Dashed) -->
+  <line x1="10" y1="32" x2="54" y2="32" stroke="white" stroke-width="2" stroke-dasharray="4 4" stroke-opacity="0.6"/>
+</svg>

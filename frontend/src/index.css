@@ -1,0 +1,211 @@
+/* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* Brand Accent */
+  --accent: #FF6C37; /* Postman Orange */
+  --accent-hover: #E6501E;
+
+  /* Sidebar (Dark Slate) */
+  --sidebar-bg: #111827; 
+  --sidebar-border: #1F2937;
+  --sidebar-text: #E5E7EB;
+  --sidebar-input-bg: #1F2937;
+  
+  /* Main Content (Light Grey/White) */
+  --main-bg: #F3F4F6;
+  --card-bg: #FFFFFF;
+  --border: #E5E7EB;
+  
+  /* Text */
+  --text-main: #111827;
+  --text-muted: #6B7280;
+
+  /* Code Editor Colors (One Dark / Dracula Vibe) */
+  --editor-bg: #1E1E1E;
+  --editor-fg: #D4D4D4;
+  --editor-header: #252526;
+  
+  /* UI Tokens */
+  --radius: 8px;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --transition: all 0.2s ease;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body, html, #root {
+  height: 100%;
+  font-family: var(--font-sans);
+  background-color: var(--main-bg);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbars - Slim & Dark */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 5px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+.app-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 48px; /* More breathing room */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sidebar Inputs */
+input[type="text"], input[type="number"] {
+  background: var(--sidebar-input-bg);
+  border: 1px solid var(--sidebar-border);
+  color: white;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  width: 100%;
+  font-size: 0.85rem;
+  font-family: var(--font-sans);
+  transition: var(--transition);
+}
+input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(255, 108, 55, 0.2);
+}
+
+.form-group { margin-bottom: 24px; }
+.form-label {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9CA3AF;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+/* Buttons */
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  padding: 12px 20px;
+  width: 100%;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 6px -1px rgba(255, 108, 55, 0.3);
+}
+.btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+.btn-secondary:hover { border-color: #9CA3AF; background: #F9FAFB; }
+
+.btn-icon {
+  background: transparent;
+  color: #9CA3AF;
+  padding: 8px;
+  border-radius: 6px;
+}
+.btn-icon:hover { background: rgba(255,255,255,0.1); color: white; }
+.light-mode-icon:hover { background: #E5E7EB; color: var(--text-main); }
+
+/* Animation */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px) translateX(-50%); }
+  to { opacity: 1; transform: translateY(0) translateX(-50%); }
+}
+
+/* --- MOBILE RESPONSIVENESS --- */
+
+/* By default, hide the mobile header */
+.mobile-header {
+  display: none;
+}
+
+.overlay {
+  display: none;
+}
+
+/* On screens smaller than 768px (Tablets & Phones) */
+@media (max-width: 768px) {
+  
+  .app-layout {
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* Sidebar becomes a drawer */
+  .sidebar-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 5px 0 25px rgba(0,0,0,0.5);
+  }
+
+  .sidebar-container.open {
+    transform: translateX(0);
+  }
+
+  /* Show the Mobile Header */
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: var(--sidebar-bg);
+    color: white;
+    border-bottom: 1px solid var(--sidebar-border);
+  }
+
+  /* Darken background when menu is open */
+  .overlay.active {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 40;
+    backdrop-filter: blur(2px);
+  }
+
+  /* Adjust Main Content */
+  .main-scroll-area {
+    padding: 20px;
+    width: 100%;
+  }
+}
