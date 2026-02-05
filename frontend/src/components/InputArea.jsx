@@ -1,6 +1,13 @@
 import React, { useRef } from 'react';
 import { FaUpload, FaTrashAlt, FaCode } from 'react-icons/fa';
 
+// --- NEW EDITOR IMPORTS ---
+import Editor from 'react-simple-code-editor';
+import Prism from 'prismjs';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-clike';
+import 'prismjs/themes/prism-tomorrow.css'; // High-end dark theme
+
 const InputArea = ({ code, setCode, stats, onFileLoad }) => {
   const fileInputRef = useRef(null);
 
@@ -73,24 +80,23 @@ const InputArea = ({ code, setCode, stats, onFileLoad }) => {
           1<br/>2<br/>3<br/>4<br/>...
         </div>
 
-        <textarea
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          placeholder="// Paste your code here..."
-          spellCheck="false"
-          style={{
-            flex: 1,
-            border: 'none',
-            padding: '16px',
-            fontFamily: 'var(--font-mono)',
-            fontSize: '13px',
-            resize: 'none',
-            outline: 'none',
-            lineHeight: '1.6',
-            color: 'var(--editor-fg)',
-            backgroundColor: 'transparent'
-          }}
-        />
+        <div style={{ flex: 1, height: '100%', overflowY: 'auto' }} className="custom-scrollbar">
+          <Editor
+            value={code}
+            onValueChange={code => setCode(code)}
+            highlight={code => Prism.highlight(code, Prism.languages.javascript, 'javascript')}
+            padding={20}
+            placeholder="// Paste your code here..."
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 13,
+              minHeight: '100%',
+              backgroundColor: 'transparent',
+              color: 'var(--editor-fg)',
+              lineHeight: '1.6'
+            }}
+          />
+        </div>
       </div>
 
       {/* Editor Footer / Status Bar */}

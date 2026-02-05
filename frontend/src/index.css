@@ -325,3 +325,15 @@ button {
   gap: 15px;
   border-top: 1px solid #333;
 }
+
+/* --- High-End Code Editor Tweaks --- */
+.container-editor textarea {
+  outline: none !important;
+}
+
+/* Ensure Prism colors look good on our dark background */
+.token.comment, .token.prolog, .token.doctype, .token.cdata { color: #6272a4; }
+.token.function { color: #50fa7b; }
+.token.string { color: #f1fa8c; }
+.token.keyword { color: #ff79c6; }
+.token.operator { color: #ffb86c; }
