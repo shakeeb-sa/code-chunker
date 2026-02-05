@@ -30,6 +30,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
+
 // @route   POST /api/auth/login
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
@@ -40,11 +41,41 @@ router.post('/login', async (req, res) => {
                 _id: user._id,
                 username: user.username,
                 email: user.email,
-                token: generateToken(user._id)
+                token: generateToken(user._id),
+                presets: user.presets // Added so your presets load when you sign in
             });
         } else {
             res.status(401).json({ message: 'Invalid email or password' });
         }
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+const { protect } = require('../middleware/auth');
+
+// @route   PUT /api/auth/presets
+// @desc    Add a new preset to user profile
+router.put('/presets', protect, async (req, res) => {
+    const { name, prefix, suffix } = req.body;
+    try {
+        const user = await User.findById(req.user._id);
+        user.presets.push({ name, prefix, suffix });
+        await user.save();
+        res.json(user.presets);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// @route   DELETE /api/auth/presets/:id
+// @desc    Remove a preset
+router.delete('/presets/:id', protect, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        user.presets = user.presets.filter(p => p._id.toString() !== req.params.id);
+        await user.save();
+        res.json(user.presets);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

@@ -209,3 +209,119 @@ button {
     width: 100%;
   }
 }
+
+
+/* --- Professional Modal System --- */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 21, 35, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: var(--sidebar-bg);
+  padding: 32px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--sidebar-border);
+  color: white;
+}
+
+.modal-content h3 {
+  margin-bottom: 8px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+}
+
+.modal-content p {
+  font-size: 0.85rem;
+  color: #9CA3AF;
+  margin-bottom: 24px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* --- Global Command Palette --- */
+.palette-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  padding-top: 15vh; /* Appear near the top */
+  z-index: 3000;
+}
+
+.palette-content {
+  background: #1E2129;
+  width: 90%;
+  max-width: 600px;
+  height: fit-content;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  border: 1px solid #333;
+  overflow: hidden;
+}
+
+.palette-input-wrapper {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #333;
+  gap: 12px;
+}
+
+.palette-input {
+  background: transparent !important;
+  border: none !important;
+  color: white !important;
+  font-size: 1.1rem !important;
+  width: 100% !important;
+  box-shadow: none !important;
+}
+
+.palette-results {
+  max-height: 350px;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.palette-item {
+  padding: 12px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  color: #BBB;
+  transition: all 0.2s;
+}
+
+.palette-item:hover, .palette-item.active {
+  background: var(--pm-orange);
+  color: white;
+}
+
+.palette-hint {
+  padding: 12px;
+  background: #15171E;
+  font-size: 0.7rem;
+  color: #666;
+  display: flex;
+  gap: 15px;
+  border-top: 1px solid #333;
+}

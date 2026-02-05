@@ -4,8 +4,37 @@ import { FaCut, FaMagic, FaSlidersH, FaTimes, FaHistory, FaTrashAlt, FaFolderOpe
 import { useAuth } from '../context/AuthContext'; // ADDED
 
 const Sidebar = ({ settings, setSettings, onSplit, isOpen, onClose, onLoadSession }) => {
-  const { logout, user } = useAuth();
+  const { logout, user, setUser, token } = useAuth(); // ADDED setUser
   const [sessions, setSessions] = useState([]);
+
+  const handleSavePreset = async () => {
+    const name = prompt("Enter a name for this preset (e.g., Bug Fixer):");
+    if (!name) return;
+
+    try {
+      const { data } = await API.put('/auth/presets', {
+        name,
+        prefix: settings.customPrefix,
+        suffix: settings.customSuffix
+      });
+      // Update the user context so the UI refreshes
+      setUser({ ...user, presets: data });
+      localStorage.setItem('user', JSON.stringify({ ...user, presets: data }));
+    } catch (err) {
+      alert("Failed to save preset");
+    }
+  };
+
+  const deletePreset = async (id, e) => {
+    e.stopPropagation();
+    try {
+      const { data } = await API.delete(`/auth/presets/${id}`);
+      setUser({ ...user, presets: data });
+      localStorage.setItem('user', JSON.stringify({ ...user, presets: data }));
+    } catch (err) {
+      alert("Delete failed");
+    }
+  };
 
   // 1. Fetch saved workspaces
   useEffect(() => {
@@ -175,11 +204,42 @@ const Sidebar = ({ settings, setSettings, onSplit, isOpen, onClose, onLoadSessio
 
         <div className="form-group">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <label className="form-label" style={{ marginBottom: 0, color: '#E5E7EB' }}><FaMagic style={{ marginRight: 6, color: '#A78BFA' }}/> AI Context Wrapper</label>
-            <button onClick={applyPreset} title="Auto-fill" style={{ fontSize: '0.7rem', color: 'var(--accent)', background: 'rgba(255, 108, 55, 0.1)', padding: '4px 8px' }}>
-              Auto-Fill
+            <label className="form-label" style={{ marginBottom: 0, color: '#E5E7EB' }}>
+              <FaMagic style={{ marginRight: 6, color: '#A78BFA' }}/> AI Context Wrapper
+            </label>
+            <button 
+              onClick={handleSavePreset} 
+              title="Save current as preset" 
+              style={{ fontSize: '0.7rem', color: '#A78BFA', background: 'rgba(167, 139, 250, 0.1)', padding: '4px 8px' }}
+            >
+              + Save Preset
             </button>
           </div>
+
+          {/* SAVED PRESETS LIST */}
+          {user?.presets?.length > 0 && (
+            <div style={{ marginBottom: '12px', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {user.presets.map(p => (
+                <div 
+                  key={p._id} 
+                  style={{ display: 'flex', alignItems: 'center', background: '#1F2937', borderRadius: '4px', overflow: 'hidden', border: '1px solid #374151' }}
+                >
+                  <button 
+                    onClick={() => setSettings({ ...settings, useContext: true, customPrefix: p.prefix, customSuffix: p.suffix })}
+                    style={{ padding: '4px 8px', fontSize: '0.7rem', color: 'white', background: 'transparent' }}
+                  >
+                    {p.name}
+                  </button>
+                  <button 
+                    onClick={(e) => deletePreset(p._id, e)}
+                    style={{ padding: '4px 6px', fontSize: '0.6rem', color: '#EF4444', background: 'rgba(239, 68, 68, 0.1)' }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
           
           <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem', cursor: 'pointer', marginBottom: '16px', color: '#D1D5DB' }}>
             <input 
