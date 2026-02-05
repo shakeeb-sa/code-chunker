@@ -1,11 +1,9 @@
-import { useEffect, useState } from 'react'; // ADDED
-import API from '../utils/api'; // ADDED
+import API from '../utils/api'; 
 import { FaCut, FaMagic, FaSlidersH, FaTimes, FaHistory, FaTrashAlt, FaFolderOpen, FaSignOutAlt } from 'react-icons/fa';
-import { useAuth } from '../context/AuthContext'; // ADDED
+import { useAuth } from '../context/AuthContext'; 
 
-const Sidebar = ({ settings, setSettings, onSplit, isOpen, onClose, onLoadSession }) => {
-  const { logout, user, setUser, token } = useAuth(); // ADDED setUser
-  const [sessions, setSessions] = useState([]);
+const Sidebar = ({ settings, setSettings, onSplit, isOpen, onClose, onLoadSession, sessions, setSessions, isProcessing }) => {
+  const { logout, user, setUser, token } = useAuth(); 
 
   const handleSavePreset = async () => {
     const name = prompt("Enter a name for this preset (e.g., Bug Fixer):");
@@ -35,17 +33,6 @@ const Sidebar = ({ settings, setSettings, onSplit, isOpen, onClose, onLoadSessio
       alert("Delete failed");
     }
   };
-
-  // 1. Fetch saved workspaces
-  useEffect(() => {
-    const fetchSessions = async () => {
-      try {
-        const { data } = await API.get('/sessions');
-        setSessions(data);
-      } catch (err) { console.error("Failed to load history"); }
-    };
-    if (user) fetchSessions();
-  }, [user]);
 
   const deleteSession = async (id, e) => {
     e.stopPropagation();
@@ -277,8 +264,20 @@ const Sidebar = ({ settings, setSettings, onSplit, isOpen, onClose, onLoadSessio
       </div>
 
       <div style={{ padding: '20px', borderTop: '1px solid var(--sidebar-border)', background: '#0F1523', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <button className="btn-primary" onClick={handleSplitClick} style={{ width: '100%' }}>
-          SPLIT CODE NOW
+        <button 
+          className="btn-primary" 
+          onClick={handleSplitClick} 
+          style={{ width: '100%', opacity: isProcessing ? 0.7 : 1 }}
+          disabled={isProcessing}
+        >
+          {isProcessing ? (
+            <>
+              <div className="spinner-mini" style={{ width: '14px', height: '14px', border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
+              PROCESSING...
+            </>
+          ) : (
+            'SPLIT CODE NOW'
+          )}
         </button>
         <button onClick={logout} style={{ background: 'none', color: '#666', fontSize: '0.75rem', justifyContent: 'center' }}>
           <FaSignOutAlt /> Sign Out

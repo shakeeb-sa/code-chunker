@@ -18,6 +18,7 @@ function App() {
   const [toastMsg, setToastMsg] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // RESTORED
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [workspaceName, setWorkspaceName] = useState('');
   
   // Palette States
@@ -64,10 +65,17 @@ function App() {
       showToast("Please input some code first!");
       return;
     }
-    const result = splitText(code, settings);
-    setChunks(result);
-    showToast(`Successfully split into ${result.length} chunks`);
-    setIsSidebarOpen(false); 
+    
+    setIsProcessing(true); // START ANIMATION
+
+    // Brief timeout to let the user "see" the app working
+    setTimeout(() => {
+      const result = splitText(code, settings);
+      setChunks(result);
+      setIsProcessing(false); // END ANIMATION
+      showToast(`Successfully split into ${result.length} chunks`);
+      setIsSidebarOpen(false); 
+    }, 600);
   };
 
   const handleSaveWorkspace = () => {

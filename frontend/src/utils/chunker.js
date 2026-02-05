@@ -19,13 +19,31 @@ export const splitText = (text, settings) => {
   const totalLines = lines.length;
   let rawChunks = [];
 
-  // 1. Logic to create raw chunks
   if (settings.mode === 'lines') {
     const size = parseInt(settings.lineCount) || 1500;
-    for (let i = 0; i < totalLines; i += size) {
-      rawChunks.push(lines.slice(i, i + size).join('\n'));
+    let currentLine = 0;
+
+    while (currentLine < totalLines) {
+      let endLine = Math.min(currentLine + size, totalLines);
+      
+      // --- SMART BREAK LOGIC ---
+      // If we are NOT at the very end, try to find a better place to cut
+      if (endLine < totalLines) {
+        // Look backwards up to 10 lines for an empty line or a closing bracket
+        for (let j = 0; j < 10; j++) {
+          const target = endLine - j;
+          if (lines[target].trim() === "" || lines[target].trim() === "}" || lines[target].trim() === ");") {
+            endLine = target + 1; // Cut right after the clean break
+            break;
+          }
+        }
+      }
+
+      rawChunks.push(lines.slice(currentLine, endLine).join('\n'));
+      currentLine = endLine;
     }
   } else {
+    // Equal Parts logic (already handles clean distribution)
     const parts = parseInt(settings.partCount) || 5;
     const base = Math.floor(totalLines / parts);
     const rem = totalLines % parts;
@@ -39,21 +57,13 @@ export const splitText = (text, settings) => {
     }
   }
 
-  // 2. Logic to Add Context (Prefix/Suffix)
+  // 2. Add Context logic remains the same...
   if (settings.useContext) {
     return rawChunks.map((chunk, i) => {
       const total = rawChunks.length;
       const current = i + 1;
-      
-      // Replace variables {i} and {total} in the user's template
-      let prefix = settings.customPrefix
-        .replace('{i}', current)
-        .replace('{total}', total);
-        
-      let suffix = settings.customSuffix
-        .replace('{i}', current)
-        .replace('{total}', total);
-
+      let prefix = settings.customPrefix.replace('{i}', current).replace('{total}', total);
+      let suffix = settings.customSuffix.replace('{i}', current).replace('{total}', total);
       return `${prefix}\n\n${chunk}\n\n${suffix}`;
     });
   }
